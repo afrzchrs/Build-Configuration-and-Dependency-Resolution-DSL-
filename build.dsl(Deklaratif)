@@ -1,0 +1,20 @@
+PROJECT "InventoryService" FROM "./" { 
+
+    DEPEND "com.google.code.gson:gson" VERSION "2.10.1"
+    DEPEND "org.jsoup:jsoup" VERSION "1.15.4"
+    DEPEND "org.apache.commons:commons-lang3" VERSION "3.12.0"
+
+    TASK run_inventory:
+        
+        ECHO ">>> [AUTO] Menata File & Struktur..."
+        ORGANIZE
+
+        FIX_DEPENDENCIES
+
+        ECHO ">>> [AUTO] Mengompilasi..."
+        RUN "COMPILE"
+        
+        ECHO ">>> [AUTO] Menjalankan Aplikasi..."
+        RUN "START Main" 
+    END
+}
