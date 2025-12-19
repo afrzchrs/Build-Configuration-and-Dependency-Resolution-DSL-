@@ -11,20 +11,17 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.ArrayList; // Tambahan
+import java.util.ArrayList; 
 import java.util.Comparator;
-import java.util.List;      // Tambahan
-import java.util.stream.Collectors; // Tambahan
+import java.util.List;     
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class BuildVisitor extends BuildDSLBaseVisitor<Object> {
 
     private Project project = null;
     private String currentEnv = "dev";
-
-    // [FITUR 1] Folder Output Statis (Satu folder saja)
     private String rootOutDir = "out"; 
-    
     private String sourcePath = null;
 
     @Override
@@ -33,7 +30,6 @@ public class BuildVisitor extends BuildDSLBaseVisitor<Object> {
         project = new Project();
         project.name = name;
 
-        // [FITUR 2] Normalisasi Path (Mengatasi masalah backslash Windows)
         if (ctx.sourcePath != null) {
             String raw = stripQuotes(ctx.sourcePath.getText());
             this.sourcePath = raw.replace("\\", "/"); 
@@ -43,10 +39,8 @@ public class BuildVisitor extends BuildDSLBaseVisitor<Object> {
         
         String projectDir = rootOutDir + File.separator + name;
 
-        // [FITUR 3] Auto-Clean (Hapus folder lama biar bersih)
         deletePath(projectDir);
 
-        // Buat struktur folder baru
         createDir(projectDir);
         createDir(projectDir + File.separator + "src");
         createDir(projectDir + File.separator + "lib");
@@ -60,7 +54,6 @@ public class BuildVisitor extends BuildDSLBaseVisitor<Object> {
         String depString = stripQuotes(ctx.STRING(0).getText());
         String version = stripQuotes(ctx.STRING(1).getText());
 
-        // Catat dependensi ke memori
         project.dependencies.add(new Dependency(depString, version));
         return null;
     }
@@ -73,14 +66,12 @@ public class BuildVisitor extends BuildDSLBaseVisitor<Object> {
         for (int i = 0; i < ctx.taskBody().getChildCount(); i++) {
             var child = ctx.taskBody().getChild(i);
             
-            // Mapping Command Baru
             if (child instanceof BuildDSLParser.OrganizeCmdContext) {
                 t.commands.add("ORGANIZE");
             }
             else if (child instanceof BuildDSLParser.FixDepCmdContext) {
                 t.commands.add("FIX_DEPS");
             }
-            // Mapping Command Lama
             else if (child instanceof BuildDSLParser.RunCmdContext) {
                 t.commands.add("RUN|" + stripQuotes(((BuildDSLParser.RunCmdContext)child).STRING().getText()));
             } 
@@ -131,15 +122,12 @@ public class BuildVisitor extends BuildDSLBaseVisitor<Object> {
             return;
         }
 
-        // 1. Jalankan Sub-Tasks
         for (String sub : t.subTasks) runTask(sub);
 
-        // 2. Jalankan Commands
         String projectOutPath = rootOutDir + File.separator + project.name;
 
         for (String cmdStr : t.commands) {
             if (cmdStr.equals("ORGANIZE")) {
-                // [UPDATE] Menggunakan organizeSmart agar struktur package aman
                 organizeSmart(projectOutPath); 
                 continue;
             }
@@ -160,7 +148,6 @@ public class BuildVisitor extends BuildDSLBaseVisitor<Object> {
                 case "COPY": copyFileOrDir(arg1, arg2); break;
                 case "DELETE": deletePath(arg1); break;
                 case "RUN":
-                    // [FITUR BARU] Cek Magic Keyword: "COMPILE" dan "START"
                     if (arg1.equalsIgnoreCase("COMPILE")) {
                         smartCompile(projectOutPath); 
                         break; 
@@ -171,7 +158,6 @@ public class BuildVisitor extends BuildDSLBaseVisitor<Object> {
                         break; 
                     }
 
-                    // Adaptasi Path untuk Windows saat RUN command (Logic Lama)
                     if (System.getProperty("os.name").toLowerCase().contains("win")) {
                         arg1 = arg1.replace("/", "\\");
                     }
@@ -186,12 +172,6 @@ public class BuildVisitor extends BuildDSLBaseVisitor<Object> {
             }
         }
     }
-
-    // =========================================================================
-    // [METHOD TAMBAHAN] Fitur Smart Project Management
-    // =========================================================================
-
-    // 1. Smart Organize: Copy file dengan mempertahankan struktur folder/package
     private void organizeSmart(String projectOutPath) {
         System.out.println(">>> [SMART ORGANIZE] Scanning & Mirroring Source...");
         if (this.sourcePath == null) return;
@@ -203,7 +183,6 @@ public class BuildVisitor extends BuildDSLBaseVisitor<Object> {
             stream.filter(p -> p.toString().endsWith(".java"))
                   .forEach(source -> {
                       try {
-                          // Hitung path relatif agar struktur folder tetap sama
                           Path relativePath = sourceRoot.relativize(source);
                           Path dest = destRoot.resolve(relativePath);
                           
@@ -220,7 +199,6 @@ public class BuildVisitor extends BuildDSLBaseVisitor<Object> {
         }
     }
 
-    // 2. Smart Compile: Otomatis cari file Java & Library lalu compile
     private void smartCompile(String projectPath) throws Exception {
         System.out.println(">>> [SMART COMPILE] Building Project...");
         
@@ -259,7 +237,6 @@ public class BuildVisitor extends BuildDSLBaseVisitor<Object> {
         Executor.exec(cmd.toString());
     }
 
-    // 3. Smart Run: Otomatis setup classpath runtime
     private void smartRun(String projectPath, String mainClass) throws Exception {
         System.out.println(">>> [SMART RUN] Launching: " + mainClass);
         
@@ -278,9 +255,6 @@ public class BuildVisitor extends BuildDSLBaseVisitor<Object> {
         Executor.exec(cmd);
     }
 
-    // =========================================================================
-
-    // [FITUR 4] Logika Organize yang "Deep Scan" (Recursive) - (LEGACY IMPLEMENTATION)
     private void organizeStructure(String projectOutPath) {
         System.out.println(">>> [ORGANIZE-LEGACY] Memulai scan folder...");
 
@@ -303,7 +277,6 @@ public class BuildVisitor extends BuildDSLBaseVisitor<Object> {
             
             final int[] count = {0};
 
-            // Files.walk akan masuk ke semua sub-folder
             try (Stream<Path> stream = Files.walk(sourceRoot)) {
                 stream.filter(p -> p.toString().endsWith(".java"))
                       .forEach(source -> {
@@ -330,7 +303,6 @@ public class BuildVisitor extends BuildDSLBaseVisitor<Object> {
         }
     }
 
-    // [FIX ERROR] Gunakan d.name bukan d.groupArtifact
     private void fixDependencies(String projectOutPath) {
         System.out.println(">>> [DEPS] Mengunduh dependensi...");
         for (Dependency d : project.dependencies) {
