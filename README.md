@@ -1,10 +1,3 @@
-Tentu, ini adalah **README.md final dan lengkap** yang menggabungkan seluruh informasi: fitur unggulan, struktur folder yang aman (untuk mencegah error rekursif tadi), panduan penggunaan detail untuk dua skenario (Proyek Lama vs Proyek Baru), daftar perintah, serta kredit tim penyusun.
-
-Silakan salin seluruh kode di bawah ini ke dalam file `README.md` Anda.
-
----
-
-```markdown
 # 🛠️ Build Configuration & Dependency Resolution DSL
 
 > **A Lightweight, Declarative, and Smart Build Automation Tool for Java Projects**
