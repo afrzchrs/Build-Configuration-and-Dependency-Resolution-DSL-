@@ -159,11 +159,11 @@ java -cp ".;src;antlr-4.13.2-complete.jar" dsl.runner.DSLRunner
 
 Proyek ini dikembangkan untuk Tugas Besar mata kuliah **Programming Language Pragmatic**.
 
-| NIM | Nama | Peran & Kontribusi |
-| --- | --- | --- |
-| **241524002** | **Afriza Choirie Saputra** | Perancangan Grammar, Konsep DSL, Dokumentasi, & Mekanisme JAR Packaging. |
-| **241524015** | **Muhamad Dino Dermawan** | Implementasi Visitor Dasar, Logika Eksekusi Task, & Modul Dependency Downloader. |
-| **241524027** | **Rizki Nurmahmudi** | Implementasi **Smart Build Features** (Recursive Scanning, Auto-Discovery), Validasi End-to-End, & Interactivity Support. |
+| NIM | Nama | 
+| --- | --- | 
+| **241524002** | **Afriza Choirie Saputra** |
+| **241524015** | **Muhamad Dino Dermawan** | 
+| **241524027** | **Rizki Nurmahmudi** |
 
 ---
 
