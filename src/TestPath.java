@@ -6,7 +6,6 @@ import java.util.stream.Stream;
 
 public class TestPath {
     public static void main(String[] args) {
-        // Ganti string di bawah ini SAMA PERSIS dengan yang Anda tulis di DSL
         String pathString = "C:/javaprojects/reservasihotel - Copy"; 
 
         System.out.println("=== DIAGNOSTIK PATH ===");
